@@ -1,7 +1,9 @@
+import atexit
 import argparse
 import random
 import time
 import sys
+import hid
 from pythonosc import udp_client
 from pyjoycon import device
 from pyjoycon.joycon import JoyCon
@@ -25,51 +27,56 @@ def dict_flatten(d, sep="/"):
     return dct
 
 
+def check_device_status():
+    print(hid.enumerate(0, 0))
+
+
+def all_done():
+    print('\n' * len(status) + "stopped osc sending")
+
+
 if __name__ == "__main__":
 
+    atexit.register(all_done)
+
     parser = argparse.ArgumentParser()
+    parser.add_argument('--side', required=True, help="'L' or 'R'")
     parser.add_argument("--ip", default="127.0.0.1",
                         help="The ip of the OSC server")
     parser.add_argument("--port", type=int, default=5005,
                         help="The port the OSC server is listening on")
     parser.add_argument("--freq", type=float, default=0.1,
                         help="sleep time (seconds)")
-    parser.add_argument("--flush", type=bool, default=True,
-                        help="osc log flush or not")
+    parser.add_argument("--verbose", type=bool, default=False,
+                        help="osc log verbose")
     args = parser.parse_args()
 
+    assert args.side in ["L", "R"], "option --side should be either 'R' or 'L'"
+
     print("Getting Joy-Con device info...")
-    ids = device.get_device_ids()
-    R_JOYCON = JoyCon(ids["R"]["vendor"], ids["R"]["product"]) if None not in ids["R"].values() else None
-    L_JOYCON = JoyCon(ids["L"]["vendor"], ids["L"]["product"]) if None not in ids["L"].values() else None
+    ids = device.get_ids(args.side)
+    joycon = JoyCon(*ids) if None not in ids else None
 
     print(
         f"Building Open Sound Control Client, ip address={args.ip}, port={args.port}")
     client = udp_client.SimpleUDPClient(args.ip, args.port)
 
+    print("Start Sending OSC ============================")
     while(True):
-        if R_JOYCON is not None:
-            status_r = R_JOYCON.get_status()
+        if joycon is not None:
+            status = dict_flatten(joycon.get_status())
             msg = ""
-            for k, v in dict_flatten(status_r).items():
+            for k, v in status.items():
                 # ex) send osc message to ("buttons/right/x", 10)
-                client.send_message("/R/" + k, v)
-                msg += f"sent osc message to {'/R/' + k} : {v}\n"
-            print(msg)
-            if args.flush: sys.stdout.flush()
-
-        if L_JOYCON is not None:
-            status_l = L_JOYCON.get_status()
-            msg = ""
-            for k, v in dict_flatten(status_l).items():
-                # ex) send osc message to ("buttons/right/x", 10)
-                client.send_message("/L/" + k, v)
-                msg += f"sent osc message to {'/L/' + k} : {v}\n"
-            print(msg)
-            if args.flush: sys.stdout.flush()
-
+                client.send_message("/" + k, v)
+                msg += f"sent osc message to /{k} : {v}\n"
+            if args.verbose:
+              print(msg)
+            else:
+              print(f"{msg}\033[{len(status) + 1}A", end="")
         time.sleep(args.freq)
         print()
+
 
 """dictionary structure of Joy-Con Status data
 {
