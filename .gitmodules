@@ -1,0 +1,3 @@
+[submodule "joycon-python"]
+	path = joycon-python
+	url = git@github.com:atsukoba/joycon-python.git
