@@ -40,8 +40,8 @@ if __name__ == "__main__":
 
     print("Getting Joy-Con device info...")
     ids = device.get_device_ids()
-    R_JOYCON = JoyCon(ids["R"]["vendor"], ids["R"]["product"]) if None not in ids["R"] else None
-    L_JOYCON = JoyCon(ids["L"]["vendor"], ids["L"]["product"]) if None not in ids["L"] else None
+    R_JOYCON = JoyCon(ids["R"]["vendor"], ids["R"]["product"]) if None not in ids["R"].values() else None
+    L_JOYCON = JoyCon(ids["L"]["vendor"], ids["L"]["product"]) if None not in ids["L"].values() else None
 
     print(
         f"Building Open Sound Control Client, ip address={args.ip}, port={args.port}")
