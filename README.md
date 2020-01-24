@@ -4,19 +4,25 @@ send osc (open sound control) by Nintendo Switch Joy-Con
 
 ## install
 
-copy scripts of sub module
+copy scripts of submodule and install python libraries.
 
 ```shell
+cd joycon-osc
 cp joycon-python/pyjoycon/* pyjoycon/
+pip install -r requirements.txt
 ```
 
 ## run
+
+![ss](https://i.gyazo.com/4b4d8029af39cf1be956aba14409d4d3.png)
+
+After connecting Joy-Con via Bluetooth (`System Preferences` > `Bluetooth`), run this command.
 
 ```shell
 python joycon-osc.py
 ```
 
-then start sending osc message
+then start sending osc message, values are taken from Joy-Con stick, buttons, gyroscope and battery property.
 
 ```text
 sent osc message to /R/battery/charging : 0
@@ -61,3 +67,11 @@ sent osc message to /R/gyro/z : -39
 ```shell
 python joycon-osc.py --port 5005 --ip "127.0.0.1" --freq 0.1 --flush True
 ```
+
+## environments
+
+tested in the following environments
+
+- macOS Catalina 10.15.2
+- Python 3.6.8
+- python-osc 1.7.0
