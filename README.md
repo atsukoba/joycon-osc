@@ -19,7 +19,7 @@ pip install -r requirements.txt
 After connecting Joy-Con via Bluetooth (`System Preferences` > `Bluetooth`), run this command.
 
 ```shell
-python joycon-osc.py
+python joycon-osc.py --side R
 ```
 
 then start sending osc message, values are taken from Joy-Con stick, buttons, gyroscope and battery property.
